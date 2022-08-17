@@ -7,4 +7,5 @@ const (
 	UNISWAPV2 = "UNISWAPV2"
 	FEE = 0.003
 	PROFITMARGIN = 1.005
+	NoArbitrage = "NOARBITRAGE"
 )

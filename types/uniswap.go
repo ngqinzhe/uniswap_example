@@ -7,15 +7,22 @@ import (
 )
 
 type MainExchange struct {
-	UniswapV1   UniswapExchange
-	UniswapV2   UniswapExchange
-	lock sync.Mutex
+	UniswapV1 UniswapExchange
+	UniswapV2 UniswapExchange
+	lock      sync.Mutex
 }
 
 type UniswapExchange struct {
 	EthReserve   float64
 	DaiReserve   float64
 	PoolConstant float64
+}
+
+func InitMainExchange(ex1ETH, ex1DAI, ex2ETH, ex2DAI float64) MainExchange {
+	return MainExchange{
+		UniswapV1: NewUniswapExchange(ex1ETH, ex1DAI),
+		UniswapV2: NewUniswapExchange(ex2ETH, ex2DAI),
+	}
 }
 
 func NewUniswapExchange(_ethReserve, _daiReserve float64) UniswapExchange {
@@ -49,8 +56,7 @@ func (m *MainExchange) Swap(exchange, tokenIn, tokenOut string, amount float64) 
 	exchangePtr := m.getExchangePtr(exchange)
 	tokenInReservePtr := getTokenReservePtr(tokenIn, exchangePtr)
 	tokenOutReservePtr := getTokenReservePtr(tokenOut, exchangePtr)
-	
-	
+
 	m.Add(exchange, tokenIn, amount*consts.FEE)
 
 	m.lock.Lock()
@@ -59,6 +65,20 @@ func (m *MainExchange) Swap(exchange, tokenIn, tokenOut string, amount float64) 
 	*tokenOutReservePtr -= tokenAmountOut
 	exchangePtr.PoolConstant = exchangePtr.EthReserve * exchangePtr.DaiReserve
 	m.lock.Unlock()
+	return tokenAmountOut
+}
+
+func (m MainExchange) CheckSwap(exchange, tokenIn, tokenOut string, amount float64) float64 {
+	exchangePtr := m.getExchangePtr(exchange)
+	tokenInReservePtr := getTokenReservePtr(tokenIn, exchangePtr)
+	tokenOutReservePtr := getTokenReservePtr(tokenOut, exchangePtr)
+
+	m.Add(exchange, tokenIn, amount*consts.FEE)
+
+	*tokenInReservePtr += amount * (1 - consts.FEE)
+	tokenAmountOut := *tokenOutReservePtr - (exchangePtr.PoolConstant / *tokenInReservePtr)
+	*tokenOutReservePtr -= tokenAmountOut
+	exchangePtr.PoolConstant = exchangePtr.EthReserve * exchangePtr.DaiReserve
 	return tokenAmountOut
 }
 

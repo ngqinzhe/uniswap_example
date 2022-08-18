@@ -30,3 +30,15 @@ Although this calculation is only a rough estimation of my own, it allows us to 
 ## Execution
 In `main.go` we will send a `goroutine` to use our `TradeBot` to scan for opportunities.
 Our `TradeBot` will continuously scan for arbitrage opportunities between both exchanges, and execute a trade if it deems profitable.
+
+## Benchmarking
+Benchmark done on our `TradeBot` scanner.
+```
+goos: darwin
+goarch: amd64
+pkg: example.com/m/types
+cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
+1000000000	0.0000443 ns/op	 0 B/op	       0 allocs/op
+PASS
+ok  	example.com/m/types	0.161s
+```

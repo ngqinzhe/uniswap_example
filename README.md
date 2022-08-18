@@ -23,7 +23,7 @@ This is used to ensure that whenever we scan for prices, there is at least poten
 ## Calculation of ETH to trade a.k.a amountIn
 To calculate how much we should trade to ensure that we do not over trade and still remain profitable, I used a simple calculation to calculate the expected price of tokens using:
 ```
-FairPrice = (sum of ETH/DAI prices in exchanges) / (number of exchanges)
+FairPrice = (ExchangeAPrice + ExchangeBPrice) / 2
 ```
 Although this calculation is only a rough estimation of my own, it allows us to trade through both exchanges and ensure that ETH/DAI prices in both exchanges are relatively similar at the end of our arbitrage, which ensures that markets remain efficient.
 

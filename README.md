@@ -3,9 +3,20 @@
 ## TYPES
 ### `types/uniswap.go`
 The Uniswap Exchange stores data about its ETH and DAI reserves and also the pool constant. Every `Add` will increase liquidity, and every `Remove` will remove liquidity.
-The `PoolConstant` will be calculated based on the formula
+The `PoolConstant` will be calculated based on the formula.
 ```
 PoolConstant = ethReserve * daiReserve
+```
+
+This is what will happen when trade is executed via the `Swap` call.
+```
+let FEE = 0.003
+let k = PoolConstant
+Liquidity added for tokenIn = amountIn * FEE (will increase PoolConstant)
+
+tokenInReserve += amountIn * (1 - FEE) (will not increase PoolConstant)
+tokenOutAmount = currentTokenOutReserve - (PoolConstant / tokenInReserve)
+
 ```
 
 To ensure no deadlocks in multiple threads, a `MainExchange` will be used as the central exchange to send orders, which ensures that the lock acquisition sequence remains consistent throughout.

@@ -63,7 +63,6 @@ func (m *MainExchange) Swap(exchange, tokenIn, tokenOut string, amount float64) 
 	*tokenInReservePtr += amount * (1 - consts.FEE)
 	tokenAmountOut := *tokenOutReservePtr - (exchangePtr.PoolConstant / *tokenInReservePtr)
 	*tokenOutReservePtr -= tokenAmountOut
-	exchangePtr.PoolConstant = exchangePtr.EthReserve * exchangePtr.DaiReserve
 	m.lock.Unlock()
 	return tokenAmountOut
 }

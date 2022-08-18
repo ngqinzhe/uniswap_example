@@ -25,7 +25,8 @@ To calculate how much we should trade to ensure that we do not over trade and st
 ```
 FairPrice = (sum of ETH/DAI prices in exchanges) / (number of exchanges)
 ```
-Although this calculation is only a rough estimation of my own, it allows us to trade through both exchanges and ensure that ETH/DAI prices in both exchanges are relatively similar at the end of our arbitrage. This also ensures that our arbitrage makes the market efficient. 
+Although this calculation is only a rough estimation of my own, it allows us to trade through both exchanges and ensure that ETH/DAI prices in both exchanges are relatively similar at the end of our arbitrage, which ensures that markets remain efficient.
 
 ## Execution
-When our `TradeBot` scanning has found an arbitrage opportunity, it will send out a go routine to execute the trade. 
+In `main.go` we will send a `goroutine` to use our `TradeBot` to scan for opportunities.
+Our `TradeBot` will continuously scan for arbitrage opportunities between both exchanges, and execute a trade if it deems profitable.

@@ -15,5 +15,7 @@ func BenchmarkTradeBot(b *testing.B) {
 	tradeBot := TradeBot{
 		WaitGroup: &_wg,
 	}
-	tradeBot.ScanPrices(&m, consts.UNISWAPV1, consts.UNISWAPV2, consts.ETH, consts.DAI)
+	tradeBot.WaitGroup.Add(1)
+	go tradeBot.ScanPrices(&m, consts.UNISWAPV1, consts.UNISWAPV2, consts.ETH, consts.DAI)
+	tradeBot.WaitGroup.Wait()
 }

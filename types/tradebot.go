@@ -21,7 +21,6 @@ func InitTradeBot() TradeBot {
 }
 
 func (t *TradeBot) StartTrade(m *MainExchange, firstExchange, secondExchange, tokenIn, tokenOut string) float64 {
-	defer t.WaitGroup.Done()
 	amountIn := GetTradeInValue(*m, firstExchange, tokenIn, tokenOut, GetFairPrice(*m, tokenIn, tokenOut))
 	log.Printf("Arbitrage found, executing trade via %v -> %v with %vETH...\n", firstExchange, secondExchange, amountIn)
 	amountOut := PerformArbitrage(m, firstExchange, secondExchange, tokenIn, tokenOut, amountIn)
@@ -34,21 +33,20 @@ func (t *TradeBot) StartTrade(m *MainExchange, firstExchange, secondExchange, to
 
 // ScanPrices will send go routines to trade if a profitable trade is spotted
 func (t *TradeBot) ScanPrices(m *MainExchange, firstExchange, secondExchange, tokenIn, tokenOut string) {
+	log.Printf("TradeBot Scanning started...")
 	for {
 		exchangeAPrice := GetConversionPrice(*m, firstExchange, tokenIn, tokenOut, 1)
 		exchangeBPrice := GetConversionPrice(*m, secondExchange, tokenIn, tokenOut, 1)
 
 		if exchangeAPrice > consts.PROFITMARGIN*exchangeBPrice {
-			t.WaitGroup.Add(1)
-			go t.StartTrade(m, consts.UNISWAPV1, consts.UNISWAPV2, consts.ETH, consts.DAI)
+			t.StartTrade(m, consts.UNISWAPV1, consts.UNISWAPV2, consts.ETH, consts.DAI)
 		} else if exchangeBPrice > consts.PROFITMARGIN*exchangeAPrice {
-			t.WaitGroup.Add(1)
-			go t.StartTrade(m, consts.UNISWAPV2, consts.UNISWAPV1, consts.ETH, consts.DAI)
+			t.StartTrade(m, consts.UNISWAPV2, consts.UNISWAPV1, consts.ETH, consts.DAI)
 		} else {
 			log.Printf("No Arbitrage opportunity available, tradebot will close now...")
+			t.WaitGroup.Done()
 			return
 		}
-		t.WaitGroup.Wait()
 	}
 }
 

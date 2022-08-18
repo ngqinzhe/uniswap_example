@@ -68,19 +68,6 @@ func (m *MainExchange) Swap(exchange, tokenIn, tokenOut string, amount float64) 
 	return tokenAmountOut
 }
 
-func (m MainExchange) CheckSwap(exchange, tokenIn, tokenOut string, amount float64) float64 {
-	exchangePtr := m.getExchangePtr(exchange)
-	tokenInReservePtr := getTokenReservePtr(tokenIn, exchangePtr)
-	tokenOutReservePtr := getTokenReservePtr(tokenOut, exchangePtr)
-
-	m.Add(exchange, tokenIn, amount*consts.FEE)
-
-	*tokenInReservePtr += amount * (1 - consts.FEE)
-	tokenAmountOut := *tokenOutReservePtr - (exchangePtr.PoolConstant / *tokenInReservePtr)
-	*tokenOutReservePtr -= tokenAmountOut
-	exchangePtr.PoolConstant = exchangePtr.EthReserve * exchangePtr.DaiReserve
-	return tokenAmountOut
-}
 
 func (m *MainExchange) getExchangePtr(exchange string) *UniswapExchange {
 	if exchange == consts.UNISWAPV1 {

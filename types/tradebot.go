@@ -1,6 +1,7 @@
 package types
 
 import (
+	"log"
 	"math"
 	"sync"
 
@@ -9,10 +10,12 @@ import (
 
 type TradeBot struct {
 	WaitGroup *sync.WaitGroup
+	lock      sync.Mutex
+	Profit    float64
 }
 
 func InitTradeBot() TradeBot {
-	return TradeBot {
+	return TradeBot{
 		WaitGroup: &sync.WaitGroup{},
 	}
 }
@@ -20,10 +23,13 @@ func InitTradeBot() TradeBot {
 func (t *TradeBot) StartTrade(m *MainExchange, firstExchange, secondExchange, tokenIn, tokenOut string) float64 {
 	defer t.WaitGroup.Done()
 	amountIn := GetTradeInValue(*m, firstExchange, tokenIn, tokenOut, GetFairPrice(*m, tokenIn, tokenOut))
+	log.Printf("Arbitrage found, executing trade via %v -> %v with %vETH...\n", firstExchange, secondExchange, amountIn)
 	amountOut := PerformArbitrage(m, firstExchange, secondExchange, tokenIn, tokenOut, amountIn)
+	log.Printf("Profit: %vETH\n", amountOut)
+	t.lock.Lock()
+	t.Profit += amountOut
+	t.lock.Unlock()
 	return amountOut
-	// fmt.Printf("Traded %v%v for %v%v, profit: %vETH\n", amountIn, tokenIn, amountOut, tokenOut, amountOut-amountIn)
-
 }
 
 // ScanPrices will send go routines to trade if a profitable trade is spotted
@@ -35,21 +41,21 @@ func (t *TradeBot) ScanPrices(m *MainExchange, firstExchange, secondExchange, to
 		if exchangeAPrice > consts.PROFITMARGIN*exchangeBPrice {
 			t.WaitGroup.Add(1)
 			go t.StartTrade(m, consts.UNISWAPV1, consts.UNISWAPV2, consts.ETH, consts.DAI)
-			t.WaitGroup.Wait()
 		} else if exchangeBPrice > consts.PROFITMARGIN*exchangeAPrice {
 			t.WaitGroup.Add(1)
 			go t.StartTrade(m, consts.UNISWAPV2, consts.UNISWAPV1, consts.ETH, consts.DAI)
-			t.WaitGroup.Wait()
 		} else {
+			log.Printf("No Arbitrage opportunity available, tradebot will close now...")
 			return
 		}
+		t.WaitGroup.Wait()
 	}
 }
 
 // In our calculation functions, we want to pass in a copy of the main exchange
 // so that we do not alter the original values
 func GetConversionPrice(m MainExchange, exchange, tokenIn, tokenOut string, amount float64) float64 {
-	return m.CheckSwap(exchange, tokenIn, tokenOut, amount)
+	return m.Swap(exchange, tokenIn, tokenOut, amount)
 }
 
 func GetTradeInValue(m MainExchange, exchange, tokenIn, tokenOut string, price float64) float64 {

@@ -12,8 +12,8 @@ func main() {
 	tradeBot := types.InitTradeBot()
 
 	tradeBot.ScanPrices(&m, consts.UNISWAPV1, consts.UNISWAPV2, consts.ETH, consts.DAI)
-
-	fmt.Printf("u1 price: %v, u2 price: %v\n", types.GetConversionPrice(m, consts.UNISWAPV1, consts.ETH, consts.DAI, 1),
+	fmt.Printf("Total Profits: %vETH\n", tradeBot.Profit)
+	fmt.Printf("exchange1 final ETH/DAI price: %v, exchange2 final ETH/DAI price: %v\n", types.GetConversionPrice(m, consts.UNISWAPV1, consts.ETH, consts.DAI, 1),
 		types.GetConversionPrice(m, consts.UNISWAPV2, consts.ETH, consts.DAI, 1))
 
 }

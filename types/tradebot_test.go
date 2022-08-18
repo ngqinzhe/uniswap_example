@@ -16,7 +16,4 @@ func BenchmarkTradeBot(b *testing.B) {
 		WaitGroup: &_wg,
 	}
 	tradeBot.ScanPrices(&m, consts.UNISWAPV1, consts.UNISWAPV2, consts.ETH, consts.DAI)
-
-	// fmt.Printf("u1 price: %v, u2 price: %v\n", GetConversionPrice(m, consts.UNISWAPV1, consts.ETH, consts.DAI, 1),
-	// 	GetConversionPrice(m, consts.UNISWAPV2, consts.ETH, consts.DAI, 1))
 }
